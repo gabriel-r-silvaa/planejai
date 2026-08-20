@@ -6,22 +6,41 @@ import {
   PiggyBank,
   Wallet,
 } from 'lucide-react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import { AIInsightsCard } from '@/components/features/SimulationResults/AIInsightCardProps'
 import { Card } from '@/components/features/SimulationResults/Card'
+import { Button } from '@/components/shared/Button'
 import { PageHero } from '@/components/shared/PageHero'
 import { useSimulationStorage } from '@/hooks/useSimulationStorage'
 import { calcMonthlySavings } from '@/utils/simulation'
 
 export function SimulationResultsPage() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const { getFormData } = useSimulationStorage()
 
   const data = id ? getFormData(id) : null
 
   if (!data) {
-    return <p>Simulação não encontrada.</p>
+    return (
+      <main
+        className="mx-auto max-w-xl px-4 py-10 text-center sm:py-14"
+        role="alert"
+      >
+        <PageHero
+          title="Simulação não encontrada"
+          subtitle="Ela pode ter sido removida ou o link usado está incorreto."
+        />
+        <Button
+          variant="primary"
+          className="mx-auto"
+          onClick={() => void navigate('/')}
+        >
+          Iniciar nova simulação
+        </Button>
+      </main>
+    )
   }
 
   const monthlySavings = calcMonthlySavings(data)

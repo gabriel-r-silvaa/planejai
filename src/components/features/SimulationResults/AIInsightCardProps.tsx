@@ -13,7 +13,12 @@ interface AIInsightCardProps {
 
 export function AIInsightsCard({ simulationId }: AIInsightCardProps) {
   const { insight, isLoading, error, fetchInsight } = useInsight(simulationId)
-  console.log(insight)
+
+  // Logo após montar, isLoading ainda é false (o useEffect de useInsight só
+  // dispara a busca depois do primeiro render) e ainda não há insight nem
+  // erro. Sem tratar esse instante, o card ficaria em branco por um frame
+  // antes do skeleton aparecer.
+  const showSkeleton = isLoading || (!insight && !error)
 
   return (
     <div className="bg-card order-2 rounded-2xl p-6 shadow-[4px_4px_18px_0px_rgba(0,0,0,0.2)] lg:order-1 lg:col-span-2">
@@ -24,8 +29,9 @@ export function AIInsightsCard({ simulationId }: AIInsightCardProps) {
         </span>
       </div>
 
-      {isLoading && (
-        <div className="flex">
+      {showSkeleton && (
+        <div className="flex" role="status">
+          <span className="sr-only">Gerando seu diagnóstico financeiro...</span>
           <Skeleton
             count={10.5}
             baseColor="var(--color-skeleton-base)"
@@ -36,7 +42,7 @@ export function AIInsightsCard({ simulationId }: AIInsightCardProps) {
           />
         </div>
       )}
-      {!isLoading && error && (
+      {!showSkeleton && error && (
         <Error
           simulationId={simulationId}
           message={error}
@@ -45,7 +51,7 @@ export function AIInsightsCard({ simulationId }: AIInsightCardProps) {
           }}
         />
       )}
-      {!isLoading && insight && !error && <Content insight={insight} />}
+      {!showSkeleton && insight && !error && <Content insight={insight} />}
     </div>
   )
 }

@@ -14,7 +14,10 @@ export function Error({ simulationId, message, onRetry }: ErrorProps) {
   }
 
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-3 p-6">
+    <div
+      className="flex h-full flex-col items-center justify-center gap-3 p-6"
+      role="alert"
+    >
       <p className="text-sm text-red-500">⚠️ {message}</p>
       <Button
         variant="primary"
