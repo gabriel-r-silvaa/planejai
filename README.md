@@ -8,6 +8,7 @@ Aplicação web de planejamento financeiro pessoal que transforma um formulário
 - [Demonstração](#demonstração)
 - [Tecnologias utilizadas](#tecnologias-utilizadas)
 - [Como executar](#como-executar)
+- [Problemas comuns com a API do Gemini](#problemas-comuns-com-a-api-do-gemini)
 - [Melhoria implementada: experiência de carregamento e erro](#melhoria-implementada-experiência-de-carregamento-e-erro)
 - [Fluxo principal](#fluxo-principal)
 - [Como testar](#como-testar)
@@ -58,7 +59,7 @@ pnpm install
 A geração dos insights depende de uma chave da API do Google Gemini. Copie o arquivo de exemplo e preencha com a sua chave (crie uma em [aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey)):
 
 ```bash
-cp .env.example .env.local
+cp env.example .env.local
 ```
 
 ```
@@ -78,6 +79,29 @@ pnpm build    # build de produção (roda o TypeScript e gera a pasta dist/)
 pnpm lint     # roda o ESLint no projeto
 pnpm preview  # serve o build de produção localmente
 ```
+
+## Problemas comuns com a API do Gemini
+
+### Erro 503: Service Unavailable
+
+O status HTTP `503` significa que o serviço do Gemini estava temporariamente indisponível no momento da requisição. Isso pode acontecer por sobrecarga momentânea da API, instabilidade do modelo ou manutenção do serviço. Em geral, não indica um erro nos dados preenchidos no formulário.
+
+O serviço da aplicação faz até três tentativas automáticas para erros temporários (`429`, `500`, `502`, `503` e `504`), com uma espera progressiva entre elas. Se o Gemini continuar indisponível, o card exibe o erro e oferece o botão **Tentar novamente**.
+
+Para investigar um erro ao executar localmente:
+
+1. Confirme que existe um arquivo `.env.local` na raiz do projeto.
+2. Confirme que a variável está preenchida, sem aspas ou espaços extras:
+
+	```dotenv
+	VITE_GEMINI_API_KEY=sua_chave_aqui
+	```
+
+3. Reinicie o servidor depois de alterar `.env.local`, pois o Vite carrega as variáveis ao iniciar.
+4. Confira se a chave está ativa e se a API Generative Language está disponível no [Google AI Studio](https://aistudio.google.com/app/apikey).
+5. Se o erro for `503`, aguarde alguns segundos e use **Tentar novamente**. Se persistir, verifique o status do serviço e os limites da sua chave.
+
+Nunca versione `.env.local` nem publique a chave da API. Variáveis com prefixo `VITE_` são incluídas no código do navegador; para uma aplicação pública, o ideal é mover a chamada ao Gemini para um backend ou função serverless.
 
 ## Melhoria implementada: experiência de carregamento e erro
 

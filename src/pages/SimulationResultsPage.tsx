@@ -3,6 +3,7 @@ import {
   CreditCardIcon,
   Goal,
   Landmark,
+  MessageCircle,
   PiggyBank,
   Wallet,
 } from 'lucide-react'
@@ -94,6 +95,17 @@ export function SimulationResultsPage() {
             subtitle={'Valor comprometido em parcelas/depósito'}
           />
         </div>
+      </div>
+      <div className="mt-6 flex justify-center">
+        <Button
+          variant="secondary"
+          icon={MessageCircle}
+          onClick={() =>
+            void navigate(`/educador-financeiro?simulacao=${data.id}`)
+          }
+        >
+          Conversar com o Educador Financeiro sobre essa simulação
+        </Button>
       </div>
     </main>
   )

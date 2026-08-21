@@ -8,7 +8,11 @@ const LOCAL_STORAGE_KEY = 'simulation-data'
 export const useSimulationStorage = () => {
   const saveFormData = (formData: SimulationFormData) => {
     const id = crypto.randomUUID()
-    const record: SimulationRecord = { ...formData, id }
+    const record: SimulationRecord = {
+      ...formData,
+      id,
+      createdAt: new Date().toISOString(),
+    }
 
     const storage = localStorage.getItem(LOCAL_STORAGE_KEY)
     const savedData = storage ? (JSON.parse(storage) as SimulationRecord[]) : []
@@ -19,6 +23,24 @@ export const useSimulationStorage = () => {
     )
 
     return id
+  }
+
+  const getAllSimulations = () => {
+    const storage = localStorage.getItem(LOCAL_STORAGE_KEY)
+
+    if (!storage) {
+      return []
+    }
+
+    const savedData = JSON.parse(storage) as SimulationRecord[]
+
+    // Registros salvos antes desta funcionalidade não têm createdAt.
+    // O fallback evita que eles quebrem a ordenação.
+    return [...savedData].sort(
+      (a, b) =>
+        new Date(b.createdAt ?? 0).getTime() -
+        new Date(a.createdAt ?? 0).getTime(),
+    )
   }
 
   const getFormData = (id: string) => {
@@ -43,5 +65,10 @@ export const useSimulationStorage = () => {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated))
   }
 
-  return { saveFormData, getFormData, updateSimulation }
+  return {
+    saveFormData,
+    getFormData,
+    updateSimulation,
+    getAllSimulations,
+  }
 }

@@ -1,4 +1,11 @@
-import { Clock, Moon, Sun, TrendingUp, Wallet } from 'lucide-react'
+import {
+  Clock,
+  MessageCircle,
+  Moon,
+  Sun,
+  TrendingUp,
+  Wallet,
+} from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 import { useTheme } from '@/hooks/useTheme'
@@ -39,6 +46,13 @@ export function Header() {
             onClick={() => void navigate('/historico')}
           >
             <span className="hidden sm:inline">Histórico</span>
+          </Button>
+          <Button
+            variant="ghost"
+            icon={MessageCircle}
+            onClick={() => void navigate('/educador-financeiro')}
+          >
+            <span className="hidden sm:inline">Educador Financeiro</span>
           </Button>
           <Divider orientation="vertical" />
           <Button
