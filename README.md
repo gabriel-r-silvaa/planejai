@@ -1,14 +1,16 @@
 # Planej.ai: Educador Financeiro com IA Generativa
 
-Aplicação web de planejamento financeiro pessoal que transforma um formulário simples em um diagnóstico gerado por IA, com sugestões práticas para o usuário alcançar sua meta.
+Uma aplicação de planejamento financeiro pessoal que transforma um formulário simples em um diagnóstico gerado por IA, com histórico de simulações e um chat para tirar dúvidas com o Educador Financeiro.
 
 ## Índice
 
 - [Sobre o projeto](#sobre-o-projeto)
+- [Estrutura do projeto](#estrutura-do-projeto)
 - [Demonstração](#demonstração)
 - [Tecnologias utilizadas](#tecnologias-utilizadas)
 - [Como executar](#como-executar)
 - [Problemas comuns com a API do Gemini](#problemas-comuns-com-a-api-do-gemini)
+- [Funcionalidades implementadas](#funcionalidades-implementadas)
 - [Melhoria implementada: experiência de carregamento e erro](#melhoria-implementada-experiência-de-carregamento-e-erro)
 - [Fluxo principal](#fluxo-principal)
 - [Como testar](#como-testar)
@@ -22,9 +24,42 @@ O **Planej.ai** é uma aplicação de planejamento financeiro pessoal. O usuári
 
 Não existe backend nem banco de dados remoto. Tudo roda no navegador: os dados das simulações ficam salvos no `localStorage` e a análise é gerada em tempo real, direto do cliente para a API de IA.
 
-Este repositório é um fork feito para um desafio prático de um curso de desenvolvimento front-end com React e IA generativa (projeto "Educador Financeiro", da DIO). O projeto foi construído aula a aula ao longo do curso, e o desafio proposto neste fork foi ir além do conteúdo ensinado: **melhorar a experiência de carregamento e erro** da aplicação, deixando-a mais robusta e mais clara para quem está usando.
+Este repositório é um fork do projeto construído durante o Bootcamp Santander 2026 - AI React Front-end, da DIO. A base do bootcamp já fornecia o formulário, os cálculos e a integração inicial com a IA. A partir dela, foram implementados três desafios práticos: melhorar loading e erro, adicionar histórico de simulações e criar o chat com o Educador Financeiro.
 
 O protótipo visual usado como referência de design está disponível no Figma: [Educador Financeiro (DIO)](https://www.figma.com/design/MVZhmZxoVAsgotZo50gj6M/Educador-Financeiro---DIO?node-id=29-403&t=Cv4vW38VUtwwLO3Z-1).
+
+## Estrutura do projeto
+
+```text
+src/
+├── pages/                         # uma página por rota
+│   ├── SimulationFormPage.tsx     # formulário
+│   ├── SimulationResultsPage.tsx  # resultado e diagnóstico
+│   ├── SimulationHistoryPage.tsx  # histórico de simulações
+│   └── ChatPage.tsx               # chat com o Educador Financeiro
+├── components/
+│   ├── features/                  # componentes específicos por funcionalidade
+│   │   ├── Simulation/
+│   │   ├── SimulationResults/
+│   │   ├── Insights/
+│   │   ├── History/
+│   │   └── Chat/
+│   ├── shared/                    # componentes reutilizáveis
+│   └── layout/                    # layout raiz e navegação
+├── hooks/                         # estado e lógica reutilizável
+│   ├── useSimulationStorage.tsx
+│   ├── useInsight.tsx
+│   ├── useChat.tsx
+│   └── useTheme.tsx
+├── services/aiService.ts          # comunicação com a API do Gemini
+├── data/                          # tipos e construtores de prompts
+├── utils/                         # funções puras
+├── context/theme/                 # contexto de tema
+├── styles/theme.css               # tokens visuais
+└── router.tsx                     # definição das rotas
+```
+
+A organização agrupa os arquivos por responsabilidade. As funcionalidades novas reaproveitam componentes e serviços existentes sempre que possível, em vez de duplicar código.
 
 ## Demonstração
 
@@ -34,17 +69,17 @@ Este fork ainda não tem uma versão publicada. Para testar, siga as instruçõe
 
 ## Tecnologias utilizadas
 
-| Tecnologia | Função no projeto |
-| --- | --- |
-| [React 19](https://react.dev/) | Biblioteca de UI |
-| [TypeScript](https://www.typescriptlang.org/) | Tipagem estática |
-| [Vite](https://vite.dev/) | Build tool e servidor de desenvolvimento |
-| [React Router](https://reactrouter.com/) | Roteamento client-side (SPA) |
-| [Tailwind CSS 4](https://tailwindcss.com/) | Estilização utilitária |
-| [react-loading-skeleton](https://www.npmjs.com/package/react-loading-skeleton) | Skeleton do estado de carregamento |
-| [lucide-react](https://lucide.dev/) | Ícones |
-| [Google Gemini API](https://ai.google.dev/) | Geração do diagnóstico financeiro (IA generativa) |
-| ESLint + Prettier | Padronização e qualidade de código |
+| Tecnologia                                                                     | Função no projeto                              |
+| ------------------------------------------------------------------------------ | ---------------------------------------------- |
+| [React 19](https://react.dev/)                                                 | Biblioteca de UI                               |
+| [TypeScript](https://www.typescriptlang.org/)                                  | Tipagem estática                               |
+| [Vite](https://vite.dev/)                                                      | Build tool e servidor de desenvolvimento       |
+| [React Router](https://reactrouter.com/)                                       | Roteamento client-side (SPA)                   |
+| [Tailwind CSS 4](https://tailwindcss.com/)                                     | Estilização utilitária                         |
+| [react-loading-skeleton](https://www.npmjs.com/package/react-loading-skeleton) | Skeleton do estado de carregamento             |
+| [lucide-react](https://lucide.dev/)                                            | Ícones                                         |
+| [Google Gemini API](https://ai.google.dev/)                                    | Geração do diagnóstico e das respostas do chat |
+| ESLint + Prettier                                                              | Padronização e qualidade de código             |
 
 ## Como executar
 
@@ -93,15 +128,35 @@ Para investigar um erro ao executar localmente:
 1. Confirme que existe um arquivo `.env.local` na raiz do projeto.
 2. Confirme que a variável está preenchida, sem aspas ou espaços extras:
 
-	```dotenv
-	VITE_GEMINI_API_KEY=sua_chave_aqui
-	```
+   ```dotenv
+   VITE_GEMINI_API_KEY=sua_chave_aqui
+   ```
 
 3. Reinicie o servidor depois de alterar `.env.local`, pois o Vite carrega as variáveis ao iniciar.
 4. Confira se a chave está ativa e se a API Generative Language está disponível no [Google AI Studio](https://aistudio.google.com/app/apikey).
 5. Se o erro for `503`, aguarde alguns segundos e use **Tentar novamente**. Se persistir, verifique o status do serviço e os limites da sua chave.
 
 Nunca versione `.env.local` nem publique a chave da API. Variáveis com prefixo `VITE_` são incluídas no código do navegador; para uma aplicação pública, o ideal é mover a chamada ao Gemini para um backend ou função serverless.
+
+## Funcionalidades implementadas
+
+### Histórico de simulações
+
+As simulações ficam salvas no `localStorage` com um identificador e a data de criação. A rota `/historico` lista os registros do mais recente para o mais antigo, exibindo nome da meta, valor, prazo, data e o status de viabilidade quando o diagnóstico já foi gerado. Cada item leva de volta à página `/resultado/:id`.
+
+O histórico também trata estados vazios e falhas de leitura do `localStorage`, oferecendo uma ação clara para iniciar uma simulação ou tentar novamente.
+
+### Educador Financeiro (chat)
+
+A rota `/educador-financeiro` permite conversar com o Educador Financeiro em múltiplos turnos. O chat exibe bolhas diferentes para usuário e modelo, indicador de digitação, rolagem automática, tratamento de erro e retry.
+
+Quando o chat é aberto a partir de uma simulação, o ID é enviado na URL (`/educador-financeiro?simulacao=<id>`). Nesse caso, a instrução de sistema inclui os dados financeiros e o diagnóstico daquela simulação. Quando aberto pelo menu, o chat funciona sem contexto específico.
+
+O histórico da conversa não é persistido entre recarregamentos. Essa decisão mantém o modelo de dados simples, enquanto o histórico das simulações continua persistido no navegador.
+
+### Integração compartilhada com o Gemini
+
+O serviço `aiService.ts` foi generalizado para suportar tanto o diagnóstico de turno único quanto o chat multi-turno. Ambos usam a mesma chamada HTTP, com `contents` para o histórico e `systemInstruction` para persona e contexto financeiro.
 
 ## Melhoria implementada: experiência de carregamento e erro
 
@@ -132,6 +187,8 @@ O card de insight da IA (`AIInsightsCard`) já vinha, da base do curso, com uma 
 5. Se a resposta chegar com sucesso, o card exibe o diagnóstico: viabilidade da meta, diagnóstico financeiro, sugestões práticas, ideias de renda extra, sugestões de investimento e uma mensagem final.
 6. Se algo falhar nesse processo, o card exibe uma mensagem de erro clara com um botão para tentar novamente, sem perder os dados já preenchidos.
 7. Se o usuário acessar uma URL de resultado com um ID que não existe (link antigo, `localStorage` limpo etc.), a página exibe um estado dedicado explicando o problema e oferece um botão para iniciar uma nova simulação.
+8. Pelo histórico, o usuário pode reabrir qualquer simulação salva.
+9. O chat pode ser usado com ou sem o contexto de uma simulação.
 
 ## Como testar
 
@@ -145,12 +202,22 @@ Ao ser redirecionado para `/resultado/:id`, o skeleton do card de insight já de
 
 Com uma chave de API válida no `.env.local`, o skeleton deve dar lugar ao diagnóstico completo (viabilidade da meta, diagnóstico, sugestões, renda extra, investimento e mensagem final) em poucos segundos.
 
+### Histórico
+
+Faça duas ou três simulações e acesse `/historico`. Confirme que elas aparecem da mais recente para a mais antiga, com nome da meta, valor, prazo, data e status corretos. Clique em um item para confirmar que a página de resultado correspondente é aberta. Com o `localStorage` vazio, deve aparecer o estado de nenhuma simulação salva.
+
+### Educador Financeiro
+
+Acesse `/educador-financeiro` pelo menu e envie uma pergunta genérica, como "como faço uma reserva de emergência?". Confirme o indicador de digitação e a resposta. Envie uma segunda pergunta para verificar se o contexto da conversa é mantido.
+
+Depois, gere uma simulação e abra o chat pelo resultado. A URL deve conter `?simulacao=<id>` e a resposta deve considerar os dados daquela simulação. Para testar o erro do chat, use uma chave inválida ou bloqueie as requisições para `generativelanguage.googleapis.com`; a mensagem enviada deve permanecer visível e o botão de retry deve reenviar a pergunta.
+
 ### Estado de erro
 
 Para reproduzir o erro de forma segura, sem alterar código, há duas opções:
 
 - Definir uma chave inválida em `VITE_GEMINI_API_KEY` no `.env.local` e reiniciar o `pnpm dev`. A API do Gemini responde com erro e a aplicação cai no fluxo de erro.
-- Com o DevTools do navegador aberto, na aba *Network*, bloquear requisições para `generativelanguage.googleapis.com` antes de enviar o formulário.
+- Com o DevTools do navegador aberto, na aba _Network_, bloquear requisições para `generativelanguage.googleapis.com` antes de enviar o formulário.
 
 Em ambos os casos, o card deve trocar o skeleton pela mensagem de erro com o botão "Tentar novamente", sem nenhum `console.error` cru nem tela em branco.
 
@@ -172,19 +239,28 @@ Trabalhar com carregamento e erro também me aproximou de acessibilidade de um j
 
 Por fim, ficou claro o valor de auditar antes de implementar. Se eu tivesse partido direto para escrever loading e erro sem checar o que já existia, teria duplicado uma lógica que já estava lá e ainda corria o risco de deixar passar o `console.log` esquecido e o outro estado sem tratamento na página de resultados.
 
+No histórico, o principal aprendizado foi sobre evolução de dados em uma aplicação sem backend. Adicionar `createdAt` ao `SimulationRecord` permitiu ordenar e exibir as simulações corretamente, além de exigir tratamento defensivo para registros criados antes desse campo existir.
+
+No chat, o aprendizado mais importante foi reaproveitar a integração com IA. A função interna do serviço foi generalizada para diferenciar um prompt de turno único de uma conversa multi-turno, usando `systemInstruction` para a persona e o contexto financeiro. Também foi necessário lidar com mensagem otimista, contexto da conversa, indicador de digitação e retry sem duplicar mensagens.
+
 ## Evolução do projeto
 
 **Antes**
+
 - Loading e erro do card de insight já existiam, mas com um instante sem nenhum feedback visual logo após a página montar.
 - Nenhuma marcação de acessibilidade nos estados de carregamento e erro.
 - `console.log` de debug esquecido no componente.
 - Página de resultados sem tratamento algum para "simulação não encontrada" (parágrafo simples, sem estilo, sem ação para o usuário).
 
 **Depois**
+
 - Skeleton aparece desde o primeiro frame, sem lacuna visual.
 - `role="status"` no carregamento e `role="alert"` no erro.
 - Código limpo, sem logs de depuração.
 - Estado de "simulação não encontrada" com visual consistente com o resto do app e um caminho claro de volta.
+- Histórico navegável e ordenado por data, com estados vazio e de erro tratados.
+- Chat com o Educador Financeiro, com ou sem contexto de uma simulação.
+- Integração Gemini compartilhada entre diagnóstico e conversa, com retry para indisponibilidade temporária.
 
 ## Prints e evidências
 
@@ -197,3 +273,5 @@ Por fim, ficou claro o valor de auditar antes de implementar. Se eu tivesse part
 <!-- Adicionar aqui um screenshot do resultado com o diagnóstico gerado -->
 
 <!-- Adicionar aqui um screenshot do estado de "simulação não encontrada" -->
+
+<!-- Adicionar aqui um screenshot do histórico e do chat -->
